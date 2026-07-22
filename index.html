@@ -20,7 +20,7 @@
         .main-grid { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
         @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
         .panel { background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border); }
-        .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+        .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .panel-header h2 { font-size: 16px; font-weight: 600; }
         .panel-content { padding: 20px; }
         .chat-container { height: 500px; display: flex; flex-direction: column; }
@@ -48,6 +48,11 @@
         .empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
         pre { background: var(--bg-tertiary); padding: 10px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
         code { background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px; }
+        .api-key-section { margin-bottom: 16px; }
+        .api-key-input { width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: 14px; margin-bottom: 8px; }
+        .api-key-input:focus { outline: none; border-color: var(--accent); }
+        .save-btn { padding: 8px 16px; background: var(--accent); color: var(--bg-primary); border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
+        .error-banner { background: rgba(239,68,68,0.2); border: 1px solid var(--error); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #fca5a5; }
     </style>
 </head>
 <body>
@@ -62,6 +67,9 @@
                 <span id="statusText">Ready</span>
             </div>
         </header>
+        
+        <div id="errorBanner" class="error-banner" style="display:none;"></div>
+        
         <div class="main-grid">
             <div class="panel">
                 <div class="panel-header">
@@ -82,10 +90,16 @@
             </div>
             <div class="sidebar">
                 <div class="panel">
-                    <div class="panel-header"><h2>Info</h2></div>
+                    <div class="panel-header"><h2>Configuration</h2></div>
                     <div class="panel-content">
+                        <div class="api-key-section">
+                            <label style="display:block;margin-bottom:8px;color:var(--text-secondary);font-size:13px;">API Key (LLM Proxy)</label>
+                            <input type="password" class="api-key-input" id="apiKeyInput" placeholder="sk-..." onkeydown="if(event.key==='Enter')saveApiKey()">
+                            <button class="save-btn" onclick="saveApiKey()">Save</button>
+                        </div>
                         <div class="info-item"><span class="info-label">Agent</span><span class="info-value">kungfu-agent</span></div>
                         <div class="info-item"><span class="info-label">Model</span><span class="info-value">minimax-m2.7</span></div>
+                        <div class="info-item"><span class="info-label">Base URL</span><span class="info-value">llm-proxy</span></div>
                     </div>
                 </div>
                 <div class="panel">
@@ -106,25 +120,44 @@
         </div>
     </div>
     <script>
-        const API_KEY = 'sk-oh-1D3r4cc3UTTMKDVkdp8dpFacX3eI7lrf';
         const LLM_BASE_URL = 'https://llm-proxy.app.all-hands.dev/';
         const LLM_MODEL = 'openhands/minimax-m2.7';
         
+        let API_KEY = localStorage.getItem('kfApiKey') || '';
         let history = [];
         let episodes = JSON.parse(localStorage.getItem('kfEpisodes') || '[]');
         
         const messagesContainer = document.getElementById('messages');
         const taskInput = document.getElementById('taskInput');
         const sendBtn = document.getElementById('sendBtn');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const errorBanner = document.getElementById('errorBanner');
         
         document.addEventListener('DOMContentLoaded', () => {
+            if (API_KEY) apiKeyInput.value = '••••••••' + API_KEY.slice(-6);
             taskInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendTask(); } });
             loadEpisodes();
         });
         
+        function saveApiKey() {
+            const key = apiKeyInput.value.trim();
+            if (key && !key.includes('•')) {
+                API_KEY = key;
+                localStorage.setItem('kfApiKey', key);
+                apiKeyInput.value = '••••••••' + key.slice(-6);
+            }
+            errorBanner.style.display = 'none';
+        }
+        
+        function showError(msg) {
+            errorBanner.textContent = msg;
+            errorBanner.style.display = 'block';
+        }
+        
         async function sendTask() {
             const task = taskInput.value.trim();
             if (!task) return;
+            if (!API_KEY) { showError('Please enter your API key first'); return; }
             
             const empty = messagesContainer.querySelector('.empty-state');
             if (empty) empty.remove();
@@ -132,6 +165,7 @@
             addMsg('user', task);
             taskInput.value = '';
             sendBtn.disabled = true;
+            errorBanner.style.display = 'none';
             history.push({ role: 'user', content: task });
             
             try {
@@ -148,7 +182,10 @@
                     })
                 });
                 
-                if (!res.ok) throw new Error('API Error ' + res.status);
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({ error: { message: 'Unknown error' } }));
+                    throw new Error(err.error?.message || 'API Error ' + res.status);
+                }
                 
                 const data = await res.json();
                 const response = data.choices[0].message.content;
@@ -162,7 +199,7 @@
                 addMsg('system', 'Episode recorded', epId);
                 loadEpisodes();
             } catch (e) {
-                addMsg('error', e.message);
+                showError(e.message);
             }
             
             sendBtn.disabled = false;
