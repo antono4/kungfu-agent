@@ -17,7 +17,7 @@
         .status-badge { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--bg-secondary); border-radius: 20px; }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
         .status-dot.connected { background: var(--success); }
-        .main-grid { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
+        .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
         @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
         .panel { background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border); }
         .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
@@ -36,9 +36,12 @@
         .send-btn { padding: 12px 24px; background: var(--accent); color: var(--bg-primary); border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
         .send-btn:disabled { opacity: 0.5; }
         .sidebar { display: flex; flex-direction: column; gap: 20px; }
-        .info-item { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; }
-        .info-label { color: var(--text-secondary); }
-        .info-value { font-family: monospace; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; margin-bottom: 6px; color: var(--text-secondary); font-size: 13px; }
+        .form-input { width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-size: 13px; font-family: monospace; }
+        .form-input:focus { outline: none; border-color: var(--accent); }
+        .save-btn { width: 100%; padding: 10px; background: var(--accent); color: var(--bg-primary); border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+        .save-btn:hover { opacity: 0.9; }
         .action-btn { width: 100%; padding: 12px 16px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: 14px; cursor: pointer; text-align: left; margin-bottom: 8px; }
         .action-btn:hover { border-color: var(--accent); }
         .episode-item { padding: 12px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 8px; }
@@ -48,11 +51,8 @@
         .empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
         pre { background: var(--bg-tertiary); padding: 10px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
         code { background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px; }
-        .api-key-section { margin-bottom: 16px; }
-        .api-key-input { width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: 14px; margin-bottom: 8px; }
-        .api-key-input:focus { outline: none; border-color: var(--accent); }
-        .save-btn { padding: 8px 16px; background: var(--accent); color: var(--bg-primary); border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
         .error-banner { background: rgba(239,68,68,0.2); border: 1px solid var(--error); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #fca5a5; }
+        .success-banner { background: rgba(34,197,94,0.2); border: 1px solid var(--success); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #86efac; }
     </style>
 </head>
 <body>
@@ -63,13 +63,12 @@
                 <h1>Kungfu Agent</h1>
             </div>
             <div class="status-badge">
-                <div class="status-dot connected" id="statusDot"></div>
+                <div class="status-dot" id="statusDot"></div>
                 <span id="statusText">Ready</span>
             </div>
         </header>
-        
         <div id="errorBanner" class="error-banner" style="display:none;"></div>
-        
+        <div id="successBanner" class="success-banner" style="display:none;"></div>
         <div class="main-grid">
             <div class="panel">
                 <div class="panel-header">
@@ -77,11 +76,7 @@
                     <button class="action-btn" onclick="clearChat()" style="width:auto;padding:6px 12px;font-size:12px;margin:0">Clear</button>
                 </div>
                 <div class="chat-container">
-                    <div class="messages" id="messages">
-                        <div class="empty-state">
-                            <p>Mulai dengan mengetik task di bawah ini</p>
-                        </div>
-                    </div>
+                    <div class="messages" id="messages"><div class="empty-state"><p>Mulai dengan mengetik task di bawah ini</p></div></div>
                     <div class="input-area">
                         <textarea class="task-input" id="taskInput" placeholder="Ketik task Anda di sini..." rows="1"></textarea>
                         <button class="send-btn" id="sendBtn" onclick="sendTask()">Send</button>
@@ -90,16 +85,21 @@
             </div>
             <div class="sidebar">
                 <div class="panel">
-                    <div class="panel-header"><h2>Configuration</h2></div>
+                    <div class="panel-header"><h2>LLM Configuration</h2></div>
                     <div class="panel-content">
-                        <div class="api-key-section">
-                            <label style="display:block;margin-bottom:8px;color:var(--text-secondary);font-size:13px;">API Key (LLM Proxy)</label>
-                            <input type="password" class="api-key-input" id="apiKeyInput" placeholder="sk-..." onkeydown="if(event.key==='Enter')saveApiKey()">
-                            <button class="save-btn" onclick="saveApiKey()">Save</button>
+                        <div class="form-group">
+                            <label class="form-label">Base URL</label>
+                            <input type="text" class="form-input" id="baseUrlInput" placeholder="https://api.openai.com/v1" onkeydown="if(event.key==='Enter')saveConfig()">
                         </div>
-                        <div class="info-item"><span class="info-label">Agent</span><span class="info-value">kungfu-agent</span></div>
-                        <div class="info-item"><span class="info-label">Model</span><span class="info-value">minimax-m2.7</span></div>
-                        <div class="info-item"><span class="info-label">Base URL</span><span class="info-value">llm-proxy</span></div>
+                        <div class="form-group">
+                            <label class="form-label">Model Name</label>
+                            <input type="text" class="form-input" id="modelInput" placeholder="gpt-4, anthropic/claude-3..." onkeydown="if(event.key==='Enter')saveConfig()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">API Key</label>
+                            <input type="password" class="form-input" id="apiKeyInput" placeholder="sk-..." onkeydown="if(event.key==='Enter')saveConfig()">
+                        </div>
+                        <button class="save-btn" onclick="saveConfig()">Save Configuration</button>
                     </div>
                 </div>
                 <div class="panel">
@@ -112,117 +112,69 @@
                 </div>
                 <div class="panel">
                     <div class="panel-header"><h2>Episodes</h2></div>
-                    <div class="panel-content" id="episodesList">
-                        <div class="empty-state"><p>No episodes</p></div>
-                    </div>
+                    <div class="panel-content" id="episodesList"><div class="empty-state"><p>No episodes</p></div></div>
                 </div>
             </div>
         </div>
     </div>
     <script>
-        const LLM_BASE_URL = 'https://llm-proxy.app.all-hands.dev/';
-        const LLM_MODEL = 'openhands/minimax-m2.7';
-        
-        let API_KEY = localStorage.getItem('kfApiKey') || '';
+        const STORAGE_KEY = 'kfConfig';
+        let config = loadConfig();
         let history = [];
         let episodes = JSON.parse(localStorage.getItem('kfEpisodes') || '[]');
-        
         const messagesContainer = document.getElementById('messages');
         const taskInput = document.getElementById('taskInput');
         const sendBtn = document.getElementById('sendBtn');
+        const baseUrlInput = document.getElementById('baseUrlInput');
+        const modelInput = document.getElementById('modelInput');
         const apiKeyInput = document.getElementById('apiKeyInput');
         const errorBanner = document.getElementById('errorBanner');
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            if (API_KEY) apiKeyInput.value = '••••••••' + API_KEY.slice(-6);
-            taskInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendTask(); } });
-            loadEpisodes();
-        });
-        
-        function saveApiKey() {
-            const key = apiKeyInput.value.trim();
-            if (key && !key.includes('•')) {
-                API_KEY = key;
-                localStorage.setItem('kfApiKey', key);
-                apiKeyInput.value = '••••••••' + key.slice(-6);
-            }
-            errorBanner.style.display = 'none';
-        }
-        
-        function showError(msg) {
-            errorBanner.textContent = msg;
-            errorBanner.style.display = 'block';
-        }
-        
+        const successBanner = document.getElementById('successBanner');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+
+        function loadConfig() { return localStorage.getItem(STORAGE_KEY) ? JSON.parse(localStorage.getItem(STORAGE_KEY)) : { baseUrl: '', model: '', apiKey: '' }; }
+        function saveConfig() { config = { baseUrl: baseUrlInput.value.trim(), model: modelInput.value.trim(), apiKey: apiKeyInput.value.trim() }; localStorage.setItem(STORAGE_KEY, JSON.stringify(config)); apiKeyInput.value = config.apiKey ? '••••••••' + config.apiKey.slice(-4) : ''; showSuccess('Configuration saved!'); }
+        function showError(msg) { errorBanner.textContent = msg; errorBanner.style.display = 'block'; successBanner.style.display = 'none'; }
+        function showSuccess(msg) { successBanner.textContent = msg; successBanner.style.display = 'block'; errorBanner.style.display = 'none'; setTimeout(() => successBanner.style.display = 'none', 3000); }
+        function updateStatus(text, connected) { statusText.textContent = text; statusDot.classList.toggle('connected', connected); }
+        document.addEventListener('DOMContentLoaded', () => { baseUrlInput.value = config.baseUrl; modelInput.value = config.model; if (config.apiKey) apiKeyInput.value = '••••••••' + config.apiKey.slice(-4); taskInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendTask(); } }); loadEpisodes(); updateStatus('Ready', false); });
+
         async function sendTask() {
             const task = taskInput.value.trim();
             if (!task) return;
-            if (!API_KEY) { showError('Please enter your API key first'); return; }
-            
+            if (!config.baseUrl || !config.model || !config.apiKey) { showError('Please configure Base URL, Model, and API Key first'); return; }
             const empty = messagesContainer.querySelector('.empty-state');
             if (empty) empty.remove();
-            
             addMsg('user', task);
             taskInput.value = '';
             sendBtn.disabled = true;
             errorBanner.style.display = 'none';
+            updateStatus('Processing...', false);
             history.push({ role: 'user', content: task });
-            
             try {
-                const res = await fetch(LLM_BASE_URL + 'v1/chat/completions', {
+                const endpoint = config.baseUrl.endsWith('/') ? config.baseUrl + 'chat/completions' : config.baseUrl + '/chat/completions';
+                const res = await fetch(endpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
-                    body: JSON.stringify({
-                        model: LLM_MODEL,
-                        messages: [
-                            { role: 'system', content: 'You are kungfu-agent, a helpful coding assistant. End responses with: --- Episode: Fact: [what you did]' },
-                            ...history.slice(-10)
-                        ],
-                        max_tokens: 2000
-                    })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + config.apiKey },
+                    body: JSON.stringify({ model: config.model, messages: [{ role: 'system', content: 'You are kungfu-agent, a helpful coding assistant. After each task, end with:\n---\n**Episode:**\n- Fact: [what you did]' }, ...history.slice(-10)], max_tokens: 2000 })
                 });
-                
-                if (!res.ok) {
-                    const err = await res.json().catch(() => ({ error: { message: 'Unknown error' } }));
-                    throw new Error(err.error?.message || 'API Error ' + res.status);
-                }
-                
+                if (!res.ok) { const err = await res.json().catch(() => ({ error: { message: 'Unknown error' } })); throw new Error(err.error?.message || 'API Error ' + res.status); }
                 const data = await res.json();
                 const response = data.choices[0].message.content;
-                
                 history.push({ role: 'assistant', content: response });
                 addMsg('agent', response);
-                
                 const epId = 'ep-' + Date.now();
                 episodes.push({ id: epId, timestamp: new Date().toISOString() });
                 localStorage.setItem('kfEpisodes', JSON.stringify(episodes));
                 addMsg('system', 'Episode recorded', epId);
                 loadEpisodes();
-            } catch (e) {
-                showError(e.message);
-            }
-            
+                updateStatus('Ready', false);
+            } catch (e) { showError(e.message); updateStatus('Error', false); }
             sendBtn.disabled = false;
         }
-        
-        function addMsg(type, content, epId) {
-            const div = document.createElement('div');
-            div.className = 'message ' + type;
-            if (type === 'system') {
-                div.innerHTML = content + '<br><span class="episode-badge">Episode: ' + epId + '</span>';
-            } else {
-                div.innerHTML = content.replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>').replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/---[\s\S]*?---/g, '').replace(/\n/g, '<br>');
-            }
-            messagesContainer.appendChild(div);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-        
-        function loadEpisodes() {
-            const container = document.getElementById('episodesList');
-            if (!episodes.length) { container.innerHTML = '<div class="empty-state"><p>No episodes</p></div>'; return; }
-            container.innerHTML = episodes.slice(-5).reverse().map(e => '<div class="episode-item"><div><span class="episode-id">' + e.id + '</span> <span class="episode-time">' + new Date(e.timestamp).toLocaleTimeString() + '</span></div></div>').join('');
-        }
-        
+        function addMsg(type, content, epId) { const div = document.createElement('div'); div.className = 'message ' + type; if (type === 'system') { div.innerHTML = content + '<br><span class="episode-badge">Episode: ' + epId + '</span>'; } else { div.innerHTML = content.replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>').replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/---[\s\S]*?---/g, '').replace(/\n/g, '<br>'); } messagesContainer.appendChild(div); messagesContainer.scrollTop = messagesContainer.scrollHeight; }
+        function loadEpisodes() { const container = document.getElementById('episodesList'); if (!episodes.length) { container.innerHTML = '<div class="empty-state"><p>No episodes</p></div>'; return; } container.innerHTML = episodes.slice(-5).reverse().map(e => '<div class="episode-item"><div><span class="episode-id">' + e.id + '</span> <span class="episode-time">' + new Date(e.timestamp).toLocaleTimeString() + '</span></div></div>').join(''); }
         function quickTask(t) { taskInput.value = t; sendTask(); }
         function clearChat() { history = []; messagesContainer.innerHTML = '<div class="empty-state"><p>Mulai dengan mengetik task di bawah ini</p></div>'; }
     </script>
