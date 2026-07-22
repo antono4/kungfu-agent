@@ -2,9 +2,12 @@
 
 Web interface untuk berinteraksi dengan **kungfu-agent** — general-purpose AI agent dengan Kungfu-style continuity dan Episode/Fact tracking.
 
+**Live Demo:** https://antono4.github.io/kungfu-agent/
+
 ![Kungfu Agent Interface](https://img.shields.io/badge/Agent-kungfu--agent-99873C?style=for-the-badge)
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688?style=for-the-badge&logo=fastapi)
+![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Deployed-brightgreen?style=for-the-badge)
 
 ## Features
 
