@@ -87,17 +87,19 @@
                 <div class="panel">
                     <div class="panel-header"><h2>LLM Configuration</h2></div>
                     <div class="panel-content">
+                        <button class="preset-btn" onclick="useGroq()" style="width:100%;padding:12px;background:#f97316;color:white;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:16px;">🔶 Use Groq (FREE - Click First!)</button>
+                        <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px;">Get free API key at console.groq.com</p>
                         <div class="form-group">
                             <label class="form-label">Base URL</label>
                             <input type="text" class="form-input" id="baseUrlInput" placeholder="https://api.openai.com/v1" onkeydown="if(event.key==='Enter')saveConfig()">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Model Name</label>
-                            <input type="text" class="form-input" id="modelInput" placeholder="gpt-4, anthropic/claude-3..." onkeydown="if(event.key==='Enter')saveConfig()">
+                            <input type="text" class="form-input" id="modelInput" placeholder="gpt-4, llama-3.1-70b-versatile" onkeydown="if(event.key==='Enter')saveConfig()">
                         </div>
                         <div class="form-group">
                             <label class="form-label">API Key</label>
-                            <input type="password" class="form-input" id="apiKeyInput" placeholder="sk-..." onkeydown="if(event.key==='Enter')saveConfig()">
+                            <input type="password" class="form-input" id="apiKeyInput" placeholder="sk-... or gsk_..." onkeydown="if(event.key==='Enter')saveConfig()">
                         </div>
                         <button class="save-btn" onclick="saveConfig()">Save Configuration</button>
                     </div>
@@ -134,6 +136,7 @@
         const statusText = document.getElementById('statusText');
 
         function loadConfig() { return localStorage.getItem(STORAGE_KEY) ? JSON.parse(localStorage.getItem(STORAGE_KEY)) : { baseUrl: '', model: '', apiKey: '' }; }
+        function useGroq() { baseUrlInput.value = 'https://api.groq.com/openai/v1'; modelInput.value = 'llama-3.1-70b-versatile'; apiKeyInput.value = ''; apiKeyInput.placeholder = 'gsk_... (from console.groq.com)'; apiKeyInput.focus(); showSuccess('Groq selected! Get free key at console.groq.com'); }
         function saveConfig() { config = { baseUrl: baseUrlInput.value.trim(), model: modelInput.value.trim(), apiKey: apiKeyInput.value.trim() }; localStorage.setItem(STORAGE_KEY, JSON.stringify(config)); apiKeyInput.value = config.apiKey ? '••••••••' + config.apiKey.slice(-4) : ''; showSuccess('Configuration saved!'); }
         function showError(msg) { errorBanner.textContent = msg; errorBanner.style.display = 'block'; successBanner.style.display = 'none'; }
         function showSuccess(msg) { successBanner.textContent = msg; successBanner.style.display = 'block'; errorBanner.style.display = 'none'; setTimeout(() => successBanner.style.display = 'none', 3000); }
