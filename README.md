@@ -1,144 +1,78 @@
 # Kungfu Agent Interface
 
-Web interface untuk berinteraksi dengan **kungfu-agent** — general-purpose AI agent dengan Kungfu-style continuity dan Episode/Fact tracking.
+Web interface untuk berinteraksi dengan **kungfu-agent** — general-purpose AI coding assistant dengan Kungfu-style Episode/Fact tracking.
 
-**Live Demo:** https://antono4.github.io/kungfu-agent/
+**🎌 Live Demo (No API needed!):** https://antono4.github.io/kungfu-agent/
 
 ![Kungfu Agent Interface](https://img.shields.io/badge/Agent-kungfu--agent-99873C?style=for-the-badge)
-![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688?style=for-the-badge&logo=fastapi)
 ![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Deployed-brightgreen?style=for-the-badge)
+![Demo Mode](https://img.shields.io/badge/Demo-Mode%20Active-22C55E?style=for-the-badge)
 
 ## Features
 
+- 🎌 **Demo Mode** — Coba langsung tanpa API key!
 - 🌐 **Web Interface** — Interface modern untuk berinteraksi dengan agent
-- 🔄 **Real-time Updates** — WebSocket untuk streaming response
 - 📋 **Episode Tracking** — Record semua task dalam format Kungfu-style
-- 🔍 **Context Continuity** — Lanjutkan pekerjaan dari session sebelumnya
-- 🛡️ **Safety First** — Konfirmasi untuk aksi berbahaya
+- ⚡ **Quick Actions** — Contoh coding task yang langsung bisa dicoba
+- 🎨 **Dark Theme** — Modern UI dengan dark mode
+- 📱 **Responsive** — Tampil baik di desktop dan mobile
 
-## Prerequisites
+## Demo Mode
 
-- Python 3.11+
-- OpenHands SDK (`openhands>=1.0.0`)
-- API key untuk LLM provider ( Anthropic, OpenAI, dll)
+Demo mode menyediakan contoh responses untuk topic umum:
 
-## Installation
+- 📊 **Fibonacci Function** — Python recursive implementation
+- 🌐 **Flask REST API** — Basic CRUD endpoints  
+- ⚡ **Async/Await** — JavaScript async patterns
+- 📦 **Python Class** — OOP example
+- 📝 **Git Commands** — Common git operations
+
+## Quick Start (Demo Mode)
+
+1. Buka https://antono4.github.io/kungfu-agent/
+2. Klik **Quick Actions** untuk melihat contoh
+3. Atau ketik task custom dan klik **Send**
+
+## Full Installation (with Real LLM)
+
+Jika ingin terhubung ke real LLM:
 
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_USERNAME/kungfu-agent-interface.git
-cd kungfu-agent-interface
+git clone https://github.com/antono4/kungfu-agent.git
+cd kungfu-agent
 
 # Install dependencies
 pip install -r requirements.txt
 
 # Set environment variables
 export LLM_API_KEY="your-api-key"
-export LLM_MODEL="anthropic/claude-sonnet-4-5-20250929"
-```
+export LLM_MODEL="gpt-4"  # atau model lain
 
-## Usage
-
-### Start the Server
-
-```bash
+# Start server
 python main.py
 ```
 
-Atau dengan uvicorn:
+## Architecture Reference
 
-```bash
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-```
+Project ini terinspirasi dari:
 
-### Access the Interface
-
-Buka browser dan navigasi ke:
-- http://localhost:8000 — Web Interface
-- http://localhost:8000/docs — API Documentation
-
-### Environment Variables
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `LLM_API_KEY` | Yes | - | API key untuk LLM provider |
-| `LLM_MODEL` | No | `anthropic/claude-sonnet-4-5-20250929` | Model yang digunakan |
-| `LLM_BASE_URL` | No | - | Base URL untuk custom LLM endpoint |
-
-## API Endpoints
-
-### REST API
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `GET /` | GET | Web Interface |
-| `GET /api/health` | GET | Health check |
-| `POST /api/task` | POST | Create task (returns queue status) |
-| `GET /api/episodes` | GET | List all episodes |
-| `GET /api/episodes/{episode_id}` | GET | Get episode details |
-| `POST /api/upload` | POST | Upload file to workspace |
-
-### WebSocket
-
-Connect ke `/ws/{workspace}` untuk real-time updates:
-
-```javascript
-const ws = new WebSocket('ws://localhost:8000/ws/default');
-
-ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    console.log(data);
-};
-
-ws.send(JSON.stringify({
-    type: 'task',
-    content: 'Add user authentication'
-}));
-```
-
-## Kungfu Agent
-
-Agent ini disimpan di `~/.agents/agents/kungfu-agent.md` dan memiliki fitur:
-
-### Kemampuan
-- **Kungfu Continuity** — Cek context dari session sebelumnya
-- **Episode/Fact Tracking** — Record progress dalam format Kungfu-style
-- **Understand First** — Pahami struktur project sebelum coding
-- **Incremental Work** — Working step-by-step dengan tracking
-- **Safety First** — Konfirmasi untuk aksi berbahaya
-
-### Constraints
-- ❌ No major architectural decisions tanpa persetujuan
-- ❌ No push ke remote repository
-- ❌ No destructive commands
-- ❌ Confirm untuk dangerous actions
-
-## Episode Format
-
-Setiap task menghasilkan Episode record:
-
-```json
-{
-    "episode_id": "ep-20240722-104530",
-    "facts": [
-        "Created auth middleware at middleware/auth.js",
-        "Updated login route to use auth middleware"
-    ],
-    "timestamp": "2024-07-22T10:45:30Z",
-    "status": "completed"
-}
-```
+- [langchain-ai/agent-chat-ui](https://github.com/langchain-ai/agent-chat-ui) — LangGraph agent chat UI
+- [hamedafarag/claudeck](https://github.com/hamedafarag/claudeck) — Browser-based Claude Code UI
+- [lhz960904/code-artisan](https://github.com/lhz960904/code-artisan) — Web coding agent (bolt.new style)
 
 ## Project Structure
 
 ```
-kungfu-agent-interface/
-├── main.py              # FastAPI application
+kungfu-agent/
+├── index.html           # Demo web interface (GitHub Pages)
 ├── templates/
-│   └── index.html       # Web interface
-├── static/              # Static assets
+│   └── index.html       # Template for Flask
+├── main.py              # FastAPI backend (optional)
 ├── requirements.txt     # Python dependencies
+├── .github/
+│   └── workflows/
+│       └── deploy.yml   # GitHub Pages deployment
 └── README.md
 ```
 
@@ -146,13 +80,6 @@ kungfu-agent-interface/
 
 Apache-2.0
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
 ---
 
-**Built with ❤️ using OpenHands SDK**
+**Built with ❤️ using Kungfu principles**
