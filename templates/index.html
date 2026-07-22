@@ -138,16 +138,16 @@
                     </div>
                     <div class="panel-content workspace-info">
                         <div class="info-item">
-                            <span class="info-label">Path</span>
-                            <span class="info-value" id="workspacePath">-</span>
-                        </div>
-                        <div class="info-item">
                             <span class="info-label">Agent</span>
                             <span class="info-value">kungfu-agent</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Model</span>
-                            <span class="info-value" id="modelName">-</span>
+                            <span class="info-value">minimax-m2.7</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Base URL</span>
+                            <span class="info-value">llm-proxy</span>
                         </div>
                     </div>
                 </div>
@@ -191,6 +191,8 @@
         // Configuration
         const OPENHANDS_API_KEY = 'sk-oh-1D3r4cc3UTTMKDVkdp8dpFacX3eI7lrf';
         const API_BASE = 'https://app.all-hands.dev/api/v1';
+        const LLM_BASE_URL = 'https://llm-proxy.app.all-hands.dev/';
+        const LLM_MODEL = 'openhands/minimax-m2.7';
         
         let conversationId = null;
         let isLoading = false;
@@ -234,7 +236,8 @@
                 },
                 body: JSON.stringify({
                     agent_name: 'kungfu-agent',
-                    model: 'anthropic/claude-sonnet-4-5-20250929'
+                    model: LLM_MODEL,
+                    base_url: LLM_BASE_URL
                 })
             });
             
@@ -285,7 +288,9 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        message: task
+                        message: task,
+                        model: LLM_MODEL,
+                        base_url: LLM_BASE_URL
                     })
                 });
                 
