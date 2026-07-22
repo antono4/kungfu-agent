@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kungfu Agent Interface</title>
+    <title>Kungfu Agent - Demo Mode</title>
+    <meta name="description" content="Demo mode - no API key needed">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%2399873C'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-family='Arial' font-size='22' font-weight='700' fill='white'%3EKF%3C/text%3E%3C/svg%3E">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -53,18 +54,21 @@
         code { background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px; }
         .error-banner { background: rgba(239,68,68,0.2); border: 1px solid var(--error); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #fca5a5; }
         .success-banner { background: rgba(34,197,94,0.2); border: 1px solid var(--success); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #86efac; }
+        .demo-badge { display: inline-block; padding: 4px 12px; background: var(--accent); color: var(--bg-primary); border-radius: 4px; font-size: 12px; font-weight: 600; margin-left: 8px; }
+        .error-banner { display: none; }
     </style>
 </head>
-<body>
+    <body>
     <div class="container">
         <header>
             <div class="logo">
                 <div class="logo-icon">KF</div>
                 <h1>Kungfu Agent</h1>
+                <span class="demo-badge">DEMO</span>
             </div>
             <div class="status-badge">
-                <div class="status-dot" id="statusDot"></div>
-                <span id="statusText">Ready</span>
+                <div class="status-dot"></div>
+                <span id="statusText">Demo Mode - No API Needed</span>
             </div>
         </header>
         <div id="errorBanner" class="error-banner" style="display:none;"></div>
@@ -85,23 +89,13 @@
             </div>
             <div class="sidebar">
                 <div class="panel">
-                    <div class="panel-header"><h2>LLM Configuration</h2></div>
+                    <div class="panel-header"><h2>Info</h2></div>
                     <div class="panel-content">
-                        <button class="preset-btn" onclick="useGroq()" style="width:100%;padding:12px;background:#f97316;color:white;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:16px;">🔶 Use Groq (FREE - Click First!)</button>
-                        <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px;">Get free API key at console.groq.com</p>
-                        <div class="form-group">
-                            <label class="form-label">Base URL</label>
-                            <input type="text" class="form-input" id="baseUrlInput" placeholder="https://api.openai.com/v1" onkeydown="if(event.key==='Enter')saveConfig()">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Model Name</label>
-                            <input type="text" class="form-input" id="modelInput" placeholder="gpt-4, llama-3.1-70b-versatile" onkeydown="if(event.key==='Enter')saveConfig()">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">API Key</label>
-                            <input type="password" class="form-input" id="apiKeyInput" placeholder="sk-... or gsk_..." onkeydown="if(event.key==='Enter')saveConfig()">
-                        </div>
-                        <button class="save-btn" onclick="saveConfig()">Save Configuration</button>
+                        <p style="color:var(--text-secondary);font-size:13px;margin-bottom:12px;">
+                            🎌 <strong>Demo Mode</strong><br><br>
+                            Tidak perlu API key!<br>
+                            Coba quick actions di bawah.
+                        </p>
                     </div>
                 </div>
                 <div class="panel">
@@ -120,66 +114,159 @@
         </div>
     </div>
     <script>
-        const STORAGE_KEY = 'kfConfig';
-        let config = loadConfig();
         let history = [];
         let episodes = JSON.parse(localStorage.getItem('kfEpisodes') || '[]');
         const messagesContainer = document.getElementById('messages');
         const taskInput = document.getElementById('taskInput');
         const sendBtn = document.getElementById('sendBtn');
-        const baseUrlInput = document.getElementById('baseUrlInput');
-        const modelInput = document.getElementById('modelInput');
-        const apiKeyInput = document.getElementById('apiKeyInput');
-        const errorBanner = document.getElementById('errorBanner');
         const successBanner = document.getElementById('successBanner');
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
 
-        function loadConfig() { return localStorage.getItem(STORAGE_KEY) ? JSON.parse(localStorage.getItem(STORAGE_KEY)) : { baseUrl: '', model: '', apiKey: '' }; }
-        function useGroq() { baseUrlInput.value = 'https://api.groq.com/openai/v1'; modelInput.value = 'llama-3.1-70b-versatile'; apiKeyInput.value = ''; apiKeyInput.placeholder = 'gsk_... (from console.groq.com)'; apiKeyInput.focus(); showSuccess('Groq selected! Get free key at console.groq.com'); }
-        function saveConfig() { config = { baseUrl: baseUrlInput.value.trim(), model: modelInput.value.trim(), apiKey: apiKeyInput.value.trim() }; localStorage.setItem(STORAGE_KEY, JSON.stringify(config)); apiKeyInput.value = config.apiKey ? '••••••••' + config.apiKey.slice(-4) : ''; showSuccess('Configuration saved!'); }
-        function showError(msg) { errorBanner.textContent = msg; errorBanner.style.display = 'block'; successBanner.style.display = 'none'; }
-        function showSuccess(msg) { successBanner.textContent = msg; successBanner.style.display = 'block'; errorBanner.style.display = 'none'; setTimeout(() => successBanner.style.display = 'none', 3000); }
-        function updateStatus(text, connected) { statusText.textContent = text; statusDot.classList.toggle('connected', connected); }
-        document.addEventListener('DOMContentLoaded', () => { baseUrlInput.value = config.baseUrl; modelInput.value = config.model; if (config.apiKey) apiKeyInput.value = '••••••••' + config.apiKey.slice(-4); taskInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendTask(); } }); loadEpisodes(); updateStatus('Ready', false); });
+        const responses = {
+            fibonacci: `Here's a Python Fibonacci function:
+
+\`\`\`python
+def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+for i in range(10):
+    print(f"F({i}) = {fibonacci(i)}")
+\`\`\`
+
+---
+**Episode:**
+- Fact: Created Fibonacci recursive function
+- File: fibonacci.py`,
+            
+            flask: `Simple Flask REST API:
+
+\`\`\`python
+from flask import Flask, jsonify
+app = Flask(__name__)
+
+@app.route('/api/hello')
+def hello():
+    return jsonify({"message": "Hello!"})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+\`\`\`
+
+---
+**Episode:**
+- Fact: Created Flask REST API
+- File: app.py`,
+            
+            async: `Async/Await in JavaScript:
+
+\`\`\`javascript
+async function fetchData(url) {
+    try {
+        const res = await fetch(url);
+        return await res.json();
+    } catch (e) {
+        console.error(e);
+    }
+}
+\`\`\`
+
+---
+**Episode:**
+- Fact: Explained async/await syntax
+- Type: JavaScript tutorial`
+        };
+
+        function getResponse(task) {
+            const lower = task.toLowerCase();
+            if (lower.includes('fibonacci')) return responses.fibonacci;
+            if (lower.includes('flask') || lower.includes('rest api')) return responses.flask;
+            if (lower.includes('async') || lower.includes('await')) return responses.async;
+            return `I received: "${task.substring(0, 50)}..."
+
+This is **Demo Mode** - try the Quick Actions buttons for working examples!
+
+---
+**Episode:**
+- Fact: Demo response shown`;
+        }
+
+        function showSuccess(msg) {
+            successBanner.textContent = msg;
+            successBanner.style.display = 'block';
+            setTimeout(() => successBanner.style.display = 'none', 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            taskInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendTask();
+                }
+            });
+            loadEpisodes();
+            showSuccess('🎌 Demo Mode Active - No API needed!');
+        });
 
         async function sendTask() {
             const task = taskInput.value.trim();
             if (!task) return;
-            if (!config.baseUrl || !config.model || !config.apiKey) { showError('Please configure Base URL, Model, and API Key first'); return; }
+            
             const empty = messagesContainer.querySelector('.empty-state');
             if (empty) empty.remove();
+            
             addMsg('user', task);
             taskInput.value = '';
             sendBtn.disabled = true;
-            errorBanner.style.display = 'none';
-            updateStatus('Processing...', false);
+            
+            await new Promise(r => setTimeout(r, 500 + Math.random() * 500));
+            
+            const response = getResponse(task);
             history.push({ role: 'user', content: task });
-            try {
-                const endpoint = config.baseUrl.endsWith('/') ? config.baseUrl + 'chat/completions' : config.baseUrl + '/chat/completions';
-                const res = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + config.apiKey },
-                    body: JSON.stringify({ model: config.model, messages: [{ role: 'system', content: 'You are kungfu-agent, a helpful coding assistant. After each task, end with:\n---\n**Episode:**\n- Fact: [what you did]' }, ...history.slice(-10)], max_tokens: 2000 })
-                });
-                if (!res.ok) { const err = await res.json().catch(() => ({ error: { message: 'Unknown error' } })); throw new Error(err.error?.message || 'API Error ' + res.status); }
-                const data = await res.json();
-                const response = data.choices[0].message.content;
-                history.push({ role: 'assistant', content: response });
-                addMsg('agent', response);
-                const epId = 'ep-' + Date.now();
-                episodes.push({ id: epId, timestamp: new Date().toISOString() });
-                localStorage.setItem('kfEpisodes', JSON.stringify(episodes));
-                addMsg('system', 'Episode recorded', epId);
-                loadEpisodes();
-                updateStatus('Ready', false);
-            } catch (e) { showError(e.message); updateStatus('Error', false); }
+            history.push({ role: 'assistant', content: response });
+            
+            addMsg('agent', response);
+            
+            const epId = 'ep-' + Date.now();
+            episodes.push({ id: epId, timestamp: new Date().toISOString(), task: task.substring(0, 40) });
+            localStorage.setItem('kfEpisodes', JSON.stringify(episodes));
+            addMsg('system', 'Episode recorded', epId);
+            loadEpisodes();
+            
             sendBtn.disabled = false;
         }
-        function addMsg(type, content, epId) { const div = document.createElement('div'); div.className = 'message ' + type; if (type === 'system') { div.innerHTML = content + '<br><span class="episode-badge">Episode: ' + epId + '</span>'; } else { div.innerHTML = content.replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>').replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/---[\s\S]*?---/g, '').replace(/\n/g, '<br>'); } messagesContainer.appendChild(div); messagesContainer.scrollTop = messagesContainer.scrollHeight; }
-        function loadEpisodes() { const container = document.getElementById('episodesList'); if (!episodes.length) { container.innerHTML = '<div class="empty-state"><p>No episodes</p></div>'; return; } container.innerHTML = episodes.slice(-5).reverse().map(e => '<div class="episode-item"><div><span class="episode-id">' + e.id + '</span> <span class="episode-time">' + new Date(e.timestamp).toLocaleTimeString() + '</span></div></div>').join(''); }
+        
+        function addMsg(type, content, epId) { 
+            const div = document.createElement('div'); 
+            div.className = 'message ' + type; 
+            if (type === 'system') { 
+                div.innerHTML = content + '<br><span class="episode-badge">Episode: ' + epId + '</span>'; 
+            } else { 
+                div.innerHTML = content
+                    .replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+                    .replace(/`([^`]+)`/g, '<code>$1</code>')
+                    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                    .replace(/---[\s\S]*?---/g, '')
+                    .replace(/\n/g, '<br>'); 
+            } 
+            messagesContainer.appendChild(div); 
+            messagesContainer.scrollTop = messagesContainer.scrollHeight; 
+        }
+        
+        function loadEpisodes() {
+            const container = document.getElementById('episodesList');
+            if (!episodes.length) {
+                container.innerHTML = '<div class="empty-state"><p>No episodes</p></div>';
+                return;
+            }
+            container.innerHTML = episodes.slice(-5).reverse().map(e =>
+                '<div class="episode-item"><div><span class="episode-id">' + e.id + '</span> <span class="episode-time">' +
+                new Date(e.timestamp).toLocaleTimeString() + '</span></div><div style="font-size:11px;color:var(--text-muted);margin-top:4px;">' + (e.task || '') + '</div></div>'
+            ).join('');
+        }
+        
         function quickTask(t) { taskInput.value = t; sendTask(); }
-        function clearChat() { history = []; messagesContainer.innerHTML = '<div class="empty-state"><p>Mulai dengan mengetik task di bawah ini</p></div>'; }
+        function clearChat() { history = []; messagesContainer.innerHTML = '<div class="empty-state"><p>🎌 Demo Mode - Try Quick Actions!</p></div>'; }
     </script>
 </body>
 </html>
