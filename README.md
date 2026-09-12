@@ -1,2 +1,31 @@
-Last updated: 2026-09-13 05:54:03 WIB
-Last updated: 2026-09-13 05:56:56 WIB
+# kungfu-agent
+
+
+
+## 📋 Overview
+
+This repository contains **15 files** and is built with the following technologies:
+
+Python, HTML
+
+## 🚀 Quick Start
+
+```bash
+pip install -r requirements.txt
+python main.py
+```
+
+## ✨ Features
+
+- 📝 Auto-generated documentation
+
+## 🛠️ Technologies
+
+Python, HTML
+
+## 📄 License
+
+MIT License
+
+---
+*Last updated: 2026-09-13 06:06:43 WIB*
