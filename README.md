@@ -11,7 +11,7 @@
   <a href="https://github.com/antono4/kungfu-agent"><img alt="GitHub repo" src="https://img.shields.io/badge/GitHub-antono4/kungfu-agent-blue?logo=github"></a>
   <a href="https://antono4.github.io/kungfu-agent/"><img alt="Live Demo" src="https://img.shields.io/badge/Live%20Demo-Online-success?logo=githubpages"></a>
   <img alt="Files" src="https://img.shields.io/badge/Files-15-informational">
-  <img alt="Updated" src="https://img.shields.io/badge/Updated-2026-09-13 11:56:37 WIB-lightgrey">
+  <img alt="Updated" src="https://img.shields.io/badge/Updated-2026-09-13 13:47:23 WIB-lightgrey">
 </p>
 
 ---
@@ -71,4 +71,4 @@ Lihat berkas [`LICENSE`](./LICENSE) untuk informasi lisensi.
 
 ---
 
-<sub>README ini di-generate otomatis pada **2026-09-13 11:56:37 WIB** oleh GitHub Actions `.github/workflows/generate-readme.yml`.</sub>
+<sub>README ini di-generate otomatis pada **2026-09-13 13:47:23 WIB** oleh GitHub Actions `.github/workflows/generate-readme.yml`.</sub>
